@@ -1,0 +1,20 @@
+# Requirements for Mani 272 UID Management System
+
+# Core Web Framework
+Flask==3.0.0
+Flask-SQLAlchemy==3.1.1
+Werkzeug==3.0.1
+
+# Discord Bot
+discord.py==2.3.2
+
+# Database
+SQLAlchemy>=2.0.25
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Utilities
+requests==2.31.0
+
+# Note: mitmproxy conflicts with Flask 3.0, use separately if needed

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mani 272 - Neural Access Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d4ff;
+            --secondary: #7f5fff;
+            --accent: #00f2fe;
+            --bg: #0a0e1a;
+            --card-bg: #12161f;
+            --text: #e6e6fa;
+            --glow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated Grid Background */
+        .hero-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #heroGridCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--primary);
+            animation: float 6s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+            50% { transform: translate(20px, -50px); opacity: 1; }
+        }
+
+        /* Hero Content */
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 2rem;
+            max-width: 900px;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            color: var(--primary);
+            letter-spacing: 8px;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.8),
+                         0 0 60px rgba(127, 95, 255, 0.6);
+            animation: glowPulse 3s infinite alternate;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes glowPulse {
+            from { 
+                text-shadow: 0 0 30px rgba(0, 212, 255, 0.8),
+                             0 0 60px rgba(127, 95, 255, 0.6);
+            }
+            to { 
+                text-shadow: 0 0 50px rgba(0, 212, 255, 1),
+                             0 0 80px rgba(127, 95, 255, 0.8);
+            }
+        }
+
+        .subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.2rem, 3vw, 2rem);
+            color: var(--accent);
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.6);
+            margin-bottom: 3rem;
+            font-weight: 400;
+        }
+
+        .glowing-line {
+            width: 80%;
+            max-width: 500px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--secondary), transparent);
+            margin: 2rem auto;
+            box-shadow: 0 0 20px var(--primary);
+            animation: lineGlow 2s infinite alternate;
+        }
+
+        @keyframes lineGlow {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            margin-bottom: 3rem;
+            color: #b8c5db;
+        }
+
+        .description strong {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .description .highlight {
+            color: #4fd1ff;
+        }
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .cyber-btn {
+            position: relative;
+            padding: 1.2rem 3rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            text-decoration: none;
+            display: inline-block;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.6);
+        }
+
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: left 0.5s;
+        }
+
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+
+        .cyber-btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .cyber-btn-secondary:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        /* Status Indicators */
+        .status-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2rem;
+            background: rgba(18, 22, 31, 0.9);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .status-dot.warning {
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+        }
+
+        .status-dot.danger {
+            background: #ff0055;
+            box-shadow: 0 0 10px #ff0055;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo-text {
+                font-size: 2.5rem;
+                letter-spacing: 4px;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+
+            .btn-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .cyber-btn {
+                width: 100%;
+                padding: 1rem 2rem;
+            }
+
+            .status-bar {
+                flex-direction: column;
+                gap: 0.5rem;
+                bottom: 1rem;
+                padding: 0.75rem 1.5rem;
+            }
+        }
+
+        /* Loading animation */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: loading 2s infinite;
+            z-index: 1000;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+
+    <div class="hero-section">
+        <canvas id="heroGridCanvas"></canvas>
+        
+        <!-- Particles -->
+        <div class="particles" id="particles"></div>
+
+        <div class="hero-content">
+            <h1 class="logo-text">Mani 272</h1>
+            <div class="glowing-line"></div>
+            <p class="subtitle">NEURAL ACCESS PORTAL</p>
+            
+            <p class="description">
+                <strong>ADVANCED SECURITY</strong> UID management system with
+                <span class="highlight">enterprise-grade encryption</span>, 
+                real-time monitoring, and 
+                <span class="highlight">professional analytics</span>
+            </p>
+
+            <div class="btn-container">
+                <a href="/login" class="cyber-btn">
+                    🔐 ACCESS SYSTEM →
+                </a>
+                <a href="https://discord.gg/your-server" class="cyber-btn cyber-btn-secondary" target="_blank">
+                    💬 DISCORD SUPPORT
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="status-dot"></span>
+            <span>SYSTEM ONLINE</span>
+        </div>
+        <div class="status-item">
+            <span class="status-dot"></span>
+            <span>PROXY ACTIVE</span>
+        </div>
+        <div class="status-item">
+            <span class="status-dot"></span>
+            <span>SSL READY</span>
+        </div>
+    </div>
+
+    <script>
+        // Grid Canvas Animation
+        const canvas = document.getElementById('heroGridCanvas');
+        const ctx = canvas.getContext('2d');
+        let width = window.innerWidth;
+        let height = window.innerHeight;
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+        const gridSize = 40;
+
+        function resizeCanvas() {
+            width = window.innerWidth;
+            height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+        }
+
+        function drawGrid() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Parallax offset
+            const offsetX = ((mouseX / width) - 0.5) * 30;
+            const offsetY = ((mouseY / height) - 0.5) * 30;
+
+            ctx.strokeStyle = 'rgba(0, 212, 255, 0.1)';
+            ctx.lineWidth = 1;
+
+            // Vertical lines
+            for (let x = -gridSize; x < width + gridSize; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x + offsetX, 0);
+                ctx.lineTo(x + offsetX, height);
+                ctx.stroke();
+            }
+
+            // Horizontal lines
+            for (let y = -gridSize; y < height + gridSize; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y + offsetY);
+                ctx.lineTo(width, y + offsetY);
+                ctx.stroke();
+            }
+
+            // Draw some glowing nodes
+            ctx.fillStyle = 'rgba(0, 212, 255, 0.5)';
+            for (let x = 0; x < width; x += gridSize * 3) {
+                for (let y = 0; y < height; y += gridSize * 3) {
+                    ctx.beginPath();
+                    ctx.arc(x + offsetX, y + offsetY, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function animate() {
+            drawGrid();
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        resizeCanvas();
+        animate();
+
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 6 + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Remove loading bar after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loading-bar').style.display = 'none';
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

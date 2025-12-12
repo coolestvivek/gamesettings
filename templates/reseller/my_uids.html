@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}My UIDs - Mani 272{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 2rem;">My UIDs</h1>
+
+<div style="background: rgba(0, 247, 255, 0.1); padding: 1.2rem 2rem; border-radius: 12px; margin-bottom: 2rem; border: 2px solid rgba(0, 247, 255, 0.3); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <strong style="color: var(--text); font-size: 1.1rem;">💰 Available Credits:</strong> 
+        <span style="color: var(--success); font-size: 1.5rem; font-weight: 700; margin-left: 1rem;">₹{{ "%.2f"|format(credits) }}</span>
+    </div>
+    <a href="{{ url_for('reseller_add_uid') }}" class="btn btn-success">➕ Add New UID</a>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">My UIDs ({{ uids|length }})</h2>
+    
+    {% if uids %}
+    <table>
+        <thead>
+            <tr>
+                <th>UID</th>
+                <th>Name</th>
+                <th>Region</th>
+                <th>Days Left</th>
+                <th>Expires</th>
+                <th>Credits Used</th>
+                <th>Status</th>
+                <th>Added Via</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for uid_entry in uids %}
+            <tr>
+                <td><strong>{{ uid_entry.uid }}</strong></td>
+                <td>{{ uid_entry.uid_name }}</td>
+                <td><span class="badge badge-primary">{{ uid_entry.region }}</span></td>
+                <td>
+                    {% if uid_entry.days_remaining() > 7 %}
+                        <span class="badge badge-success">{{ uid_entry.days_remaining() }} days</span>
+                    {% elif uid_entry.days_remaining() > 0 %}
+                        <span class="badge badge-warning">{{ uid_entry.days_remaining() }} days</span>
+                    {% else %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% endif %}
+                </td>
+                <td>{{ uid_entry.expires_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>₹{{ "%.2f"|format(uid_entry.credits_used) }}</td>
+                <td>
+                    {% if uid_entry.is_expired() %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% else %}
+                        <span class="badge badge-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if uid_entry.added_via == 'discord' %}
+                        <span class="badge badge-primary">Discord</span>
+                    {% else %}
+                        <span class="badge badge-success">Web</span>
+                    {% endif %}
+                </td>
+                <td>{{ uid_entry.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #999;">You haven't added any UIDs yet.</p>
+    <p style="color: #999;">Click "Add New UID" button above to add your first UID.</p>
+    {% endif %}
+</div>
+
+{% if uids %}
+<div class="card">
+    <h3 style="margin-bottom: 1rem;">Summary Statistics</h3>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        <div style="padding: 1.5rem; background: rgba(0, 247, 255, 0.08); border-radius: 10px; text-align: center; border: 1px solid rgba(0, 247, 255, 0.3);">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">{{ uids|length }}</div>
+            <div style="color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">Total UIDs</div>
+        </div>
+        
+        <div style="padding: 1.5rem; background: rgba(0, 255, 136, 0.08); border-radius: 10px; text-align: center; border: 1px solid rgba(0, 255, 136, 0.3);">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--success);">
+                {{ uids|rejectattr('is_expired')|list|length }}
+            </div>
+            <div style="color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">Active</div>
+        </div>
+        
+        <div style="padding: 1.5rem; background: rgba(255, 0, 85, 0.08); border-radius: 10px; text-align: center; border: 1px solid rgba(255, 0, 85, 0.3);">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--danger);">
+                {{ uids|selectattr('is_expired')|list|length }}
+            </div>
+            <div style="color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">Expired</div>
+        </div>
+        
+        <div style="padding: 1.5rem; background: rgba(255, 170, 0, 0.08); border-radius: 10px; text-align: center; border: 1px solid rgba(255, 170, 0, 0.3);">
+            <div style="font-size: 2rem; font-weight: bold; color: var(--warning);">
+                ₹{{ "%.2f"|format(uids|sum(attribute='credits_used')) }}
+            </div>
+            <div style="color: var(--text-muted); text-transform: uppercase; margin-top: 0.5rem;">Total Spent</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

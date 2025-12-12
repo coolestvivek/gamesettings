@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Reseller Dashboard - Mani 272{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 2rem;">Reseller Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>₹{{ "%.2f"|format(credits) }}</h3>
+        <p>Available Credits</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ my_uids|length }}</h3>
+        <p>My UIDs</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ my_uids|selectattr('is_active')|list|length }}</h3>
+        <p>Active UIDs</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ recent_transactions|length }}</h3>
+        <p>Recent Transactions</p>
+    </div>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">My UIDs</h2>
+    
+    {% if my_uids %}
+    <table>
+        <thead>
+            <tr>
+                <th>UID</th>
+                <th>Name</th>
+                <th>Region</th>
+                <th>Days Left</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Added</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for uid_entry in my_uids %}
+            <tr>
+                <td><strong>{{ uid_entry.uid }}</strong></td>
+                <td>{{ uid_entry.uid_name }}</td>
+                <td><span class="badge badge-primary">{{ uid_entry.region }}</span></td>
+                <td>
+                    {% if uid_entry.days_remaining() > 7 %}
+                        <span class="badge badge-success">{{ uid_entry.days_remaining() }} days</span>
+                    {% elif uid_entry.days_remaining() > 0 %}
+                        <span class="badge badge-warning">{{ uid_entry.days_remaining() }} days</span>
+                    {% else %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% endif %}
+                </td>
+                <td>{{ uid_entry.expires_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if uid_entry.is_expired() %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% else %}
+                        <span class="badge badge-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>{{ uid_entry.created_at.strftime('%Y-%m-%d') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #999;">You haven't added any UIDs yet. <a href="{{ url_for('reseller_add_uid') }}">Add your first UID</a></p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">Recent Transactions</h2>
+    
+    {% if recent_transactions %}
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Description</th>
+                <th>Balance After</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trans in recent_transactions %}
+            <tr>
+                <td>
+                    {% if trans.type == 'credit' %}
+                        <span class="badge badge-success">Credit</span>
+                    {% elif trans.type == 'debit' %}
+                        <span class="badge badge-danger">Debit</span>
+                    {% else %}
+                        <span class="badge badge-primary">{{ trans.type }}</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if trans.amount > 0 %}
+                        <span style="color: green;">+₹{{ "%.2f"|format(trans.amount) }}</span>
+                    {% else %}
+                        <span style="color: red;">₹{{ "%.2f"|format(trans.amount) }}</span>
+                    {% endif %}
+                </td>
+                <td>{{ trans.description or '-' }}</td>
+                <td>₹{{ "%.2f"|format(trans.balance_after) }}</td>
+                <td>{{ trans.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #999;">No transactions yet</p>
+    {% endif %}
+</div>
+{% endblock %}

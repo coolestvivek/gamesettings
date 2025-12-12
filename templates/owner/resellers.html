@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Resellers - Mani 272{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 2rem;">Manage Resellers</h1>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">Add New Reseller</h2>
+    
+    <form method="POST" action="{{ url_for('owner_add_reseller') }}">
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required placeholder="Enter username">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Enter password">
+            </div>
+            
+            <div class="form-group">
+                <label for="credits">Initial Credits</label>
+                <input type="number" id="credits" name="credits" value="0" step="0.01" min="0" placeholder="0.00">
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-success" style="margin-top: 1rem;">➕ Add Reseller</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">Existing Resellers ({{ resellers|length }})</h2>
+    
+    {% if resellers %}
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Credits</th>
+                <th>UIDs Added</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reseller in resellers %}
+            <tr>
+                <td><strong>{{ reseller.username }}</strong></td>
+                <td>₹{{ "%.2f"|format(reseller.credits) }}</td>
+                <td>{{ reseller.uids.count() }}</td>
+                <td>
+                    {% if reseller.is_active %}
+                        <span class="badge badge-success">Active</span>
+                    {% else %}
+                        <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ reseller.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <button onclick="showAddCreditsModal({{ reseller.id }}, '{{ reseller.username }}')" 
+                            class="btn btn-success" style="padding: 0.5rem 1rem; margin-right: 0.5rem; font-size: 0.875rem;">
+                        💰 Credits
+                    </button>
+                    
+                    <button onclick="showChangeCredsModal({{ reseller.id }}, '{{ reseller.username }}')" 
+                            class="btn btn-primary" style="padding: 0.5rem 1rem; margin-right: 0.5rem; font-size: 0.875rem;">
+                        🔑 Change
+                    </button>
+                    
+                    {% if reseller.is_active %}
+                    <a href="{{ url_for('owner_delete_reseller', reseller_id=reseller.id) }}" 
+                       class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.875rem;"
+                       onclick="return confirm('Delete {{ reseller.username }}?')">
+                        🗑️ Delete
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #999;">No resellers yet. Add your first reseller above.</p>
+    {% endif %}
+</div>
+
+<!-- Add Credits Modal -->
+<div id="addCreditsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 500px; margin: 0;">
+        <h2 style="margin-bottom: 1rem;">💰 Add Credits</h2>
+        
+        <form method="POST" id="addCreditsForm">
+            <div class="form-group">
+                <label>Reseller</label>
+                <input type="text" id="modalResellerName" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Credits to Add</label>
+                <input type="number" id="amount" name="amount" step="0.01" min="0.01" required>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-success">Add Credits</button>
+                <button type="button" class="btn btn-danger" onclick="hideAddCreditsModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Change Credentials Modal -->
+<div id="changeCredsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 500px; margin: 0;">
+        <h2 style="margin-bottom: 1rem;">🔑 Change Credentials</h2>
+        
+        <form method="POST" id="changeCredsForm">
+            <div class="form-group">
+                <label>Current Username</label>
+                <input type="text" id="modalCurrentUsername" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_username">New Username (leave blank to keep current)</label>
+                <input type="text" id="new_username" name="new_username" placeholder="Enter new username">
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password">New Password (leave blank to keep current)</label>
+                <input type="password" id="new_password" name="new_password" placeholder="Enter new password" minlength="6">
+                <small style="color: var(--text-muted); display: block; margin-top: 0.5rem;">
+                    Minimum 6 characters if changing password
+                </small>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">Update Credentials</button>
+                <button type="button" class="btn btn-danger" onclick="hideChangeCredsModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showAddCreditsModal(resellerId, resellerName) {
+    document.getElementById('modalResellerName').value = resellerName;
+    document.getElementById('addCreditsForm').action = `/owner/add_credits/${resellerId}`;
+    document.getElementById('addCreditsModal').style.display = 'flex';
+}
+
+function hideAddCreditsModal() {
+    document.getElementById('addCreditsModal').style.display = 'none';
+    document.getElementById('amount').value = '';
+}
+
+function showChangeCredsModal(resellerId, resellerName) {
+    document.getElementById('modalCurrentUsername').value = resellerName;
+    document.getElementById('changeCredsForm').action = `/owner/change_credentials/${resellerId}`;
+    document.getElementById('changeCredsModal').style.display = 'flex';
+}
+
+function hideChangeCredsModal() {
+    document.getElementById('changeCredsModal').style.display = 'none';
+    document.getElementById('new_username').value = '';
+    document.getElementById('new_password').value = '';
+}
+
+// Close modals on outside click
+document.addEventListener('click', function(e) {
+    if (e.target.id === 'addCreditsModal') {
+        hideAddCreditsModal();
+    }
+    if (e.target.id === 'changeCredsModal') {
+        hideChangeCredsModal();
+    }
+});
+</script>
+{% endblock %}

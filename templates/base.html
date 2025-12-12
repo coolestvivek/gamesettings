@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mani 272{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if session.get('user_id') %}
+    <nav class="navbar">
+        <div class="navbar-brand">⚡ Mani 272</div>
+        <div class="navbar-menu">
+            <a href="{{ url_for('dashboard') }}">🏠 Dashboard</a>
+            {% if session.get('role') == 'owner' %}
+                <a href="{{ url_for('owner_resellers') }}">👥 Resellers</a>
+                <a href="{{ url_for('owner_all_uids') }}">📋 All UIDs</a>
+                <a href="{{ url_for('owner_add_uid') }}">➕ Add UID</a>
+            {% else %}
+                <a href="{{ url_for('reseller_my_uids') }}">📋 My UIDs</a>
+                <a href="{{ url_for('reseller_add_uid') }}">➕ Add UID</a>
+            {% endif %}
+            <a href="{{ url_for('change_password') }}">🔒 Password</a>
+            <span style="color: var(--primary); font-weight: 700;">{{ session.get('username') }}</span>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger" style="padding: 0.5rem 1rem;">Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    {% else %}
+    {% block login_content %}{% endblock %}
+    {% endif %}
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

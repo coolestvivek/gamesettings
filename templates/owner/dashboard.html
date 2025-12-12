@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block title %}Owner Dashboard - Mani 272{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #4fd1ff;
+        --secondary-color: #7f5fff;
+        --accent-color: #00f2fe;
+        --text-color: #e6e6fa;
+        --card-bg: #181a2b;
+        --border-color: #23263a;
+    }
+
+    body {
+        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif !important;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-header h1 {
+        color: var(--primary-color);
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 2px var(--primary-color);
+        letter-spacing: -0.02em;
+    }
+    
+    .dashboard-header p {
+        color: rgba(230, 230, 250, 0.7);
+        font-size: 0.9rem;
+        font-weight: 400;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card-modern {
+        position: relative;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        padding: 1.2rem;
+        transition: all 0.3s cubic-bezier(0.77,0,0.175,1);
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    
+    .stat-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        opacity: 1;
+    }
+    
+    .stat-card-modern:hover {
+        transform: translateY(-4px);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 2px var(--primary-color), 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.8rem;
+        display: block;
+        text-shadow: 0 0 8px var(--primary-color);
+    }
+    
+    .stat-card-modern h3 {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+    
+    .stat-card-modern p {
+        color: rgba(230, 230, 250, 0.7);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin: 0;
+    }
+    
+    .stat-card-modern.purple::before {
+        background: linear-gradient(90deg, #4fd1ff 0%, #7f5fff 100%);
+    }
+    
+    .stat-card-modern.blue::before {
+        background: linear-gradient(90deg, #00BFFF 0%, #4fd1ff 100%);
+    }
+    
+    .stat-card-modern.green::before {
+        background: linear-gradient(90deg, #01B574 0%, #05CD99 100%);
+    }
+    
+    .stat-card-modern.gold::before {
+        background: linear-gradient(90deg, #FFB547 0%, #FFCA28 100%);
+    }
+
+    /* Card sections with sharp edges */
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .card h2 {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 0 0 1px var(--primary-color);
+    }
+
+    /* Table styling to match Terminal X 999 */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+
+    .table th {
+        background: rgba(79, 209, 255, 0.08);
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.8rem;
+        text-align: left;
+        border-bottom: 2px solid var(--primary-color);
+    }
+
+    .table td {
+        padding: 0.9rem 0.8rem;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(79, 209, 255, 0.05);
+    }
+
+    /* Badge styling */
+    .badge {
+        padding: 0.35rem 0.7rem;
+        border-radius: 0;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .badge-success {
+        background: rgba(1, 181, 116, 0.15);
+        color: #05CD99;
+        border: 1px solid rgba(1, 181, 116, 0.3);
+    }
+
+    .badge-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Button styling */
+    .btn {
+        padding: 0.7rem 1.2rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border-radius: 0;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-secondary {
+        background: linear-gradient(90deg, #4fd1ff 0%, #7f5fff 100%);
+        color: #fff !important;
+        box-shadow: 0 0 2px #4fd1ff;
+    }
+
+    .btn-secondary:hover {
+        background: linear-gradient(90deg, #7f5fff 0%, #4fd1ff 100%);
+        box-shadow: 0 0 4px #7f5fff;
+        transform: translateY(-2px);
+    }
+</style>
+
+<div class="dashboard-header">
+    <h1>👑 Owner Dashboard</h1>
+    <p>Complete system overview and management</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card-modern purple">
+        <div class="stat-icon">👥</div>
+        <h3>{{ total_resellers }}</h3>
+        <p>Active Resellers</p>
+    </div>
+    <div class="stat-card-modern blue">
+        <div class="stat-icon">🎯</div>
+        <h3>{{ total_uids }}</h3>
+        <p>Total Active UIDs</p>
+    </div>
+    <div class="stat-card-modern green">
+        <div class="stat-icon">🆕</div>
+        <h3>{{ recent_uids|length }}</h3>
+        <p>Recent Additions</p>
+    </div>
+    <div class="stat-card-modern gold">
+        <div class="stat-icon">💎</div>
+        <h3>∞</h3>
+        <p>Your Credits</p>
+    </div>
+</div>
+
+<div class="card">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 1.5rem;">📊</span> Recent UIDs
+        </h2>
+        <a href="{{ url_for('owner_all_uids') }}" class="btn btn-secondary" style="padding: 0.625rem 1.25rem;">
+            View All →
+        </a>
+    </div>
+    
+    {% if recent_uids %}
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>Name</th>
+                    <th>Region</th>
+                    <th>Added By</th>
+                    <th>Days Left</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for uid_entry in recent_uids %}
+                <tr>
+                    <td><strong>{{ uid_entry.uid }}</strong></td>
+                    <td>{{ uid_entry.uid_name }}</td>
+                    <td><span class="badge badge-primary">{{ uid_entry.region }}</span></td>
+                    <td>{{ uid_entry.owner.username }}</td>
+                    <td><strong>{{ uid_entry.days_remaining() }}</strong> days</td>
+                    <td>
+                        {% if uid_entry.is_expired() %}
+                            <span class="badge badge-danger">❌ Expired</span>
+                        {% else %}
+                            <span class="badge badge-success">✅ Active</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+        <p>No UIDs added yet</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+        <span style="font-size: 1.5rem;">📋</span>
+        <h2 style="margin: 0;">Recent Activity</h2>
+    </div>
+    
+    {% if recent_logs %}
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td><strong>{{ log.user.username if log.user else '⚙️ System' }}</strong></td>
+                    <td><span class="badge badge-primary">{{ log.action }}</span></td>
+                    <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{{ log.details or '-' }}</td>
+                    <td style="white-space: nowrap;">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+        <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🕐</div>
+        <p>No recent activity</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

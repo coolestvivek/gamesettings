@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}All UIDs - Mani 272{% endblock %}
+
+{% block content %}
+<h1 style="color: white; margin-bottom: 2rem;">All UIDs Management</h1>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">Filters</h2>
+    
+    <form method="GET" action="{{ url_for('owner_all_uids') }}">
+        <div class="form-grid-2">
+            <div class="form-group">
+                <label for="region">Region</label>
+                <select id="region" name="region">
+                    <option value="">All Regions</option>
+                    {% for r in regions %}
+                    <option value="{{ r }}" {% if r == selected_region %}selected{% endif %}>{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="reseller">Reseller</label>
+                <select id="reseller" name="reseller">
+                    <option value="">All Resellers</option>
+                    {% for r in resellers %}
+                    <option value="{{ r.username }}" {% if r.username == selected_reseller %}selected{% endif %}>
+                        {{ r.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">🔍 Apply Filters</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2 style="margin-bottom: 1rem;">UIDs ({{ uids|length }})</h2>
+    
+    {% if uids %}
+    <table>
+        <thead>
+            <tr>
+                <th>UID</th>
+                <th>Name</th>
+                <th>Region</th>
+                <th>Added By</th>
+                <th>Days Left</th>
+                <th>Expires</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for uid_entry in uids %}
+            <tr>
+                <td><strong>{{ uid_entry.uid }}</strong></td>
+                <td>{{ uid_entry.uid_name }}</td>
+                <td><span class="badge badge-primary">{{ uid_entry.region }}</span></td>
+                <td>{{ uid_entry.owner.username }}</td>
+                <td>
+                    {% if uid_entry.days_remaining() > 7 %}
+                        <span class="badge badge-success">{{ uid_entry.days_remaining() }} days</span>
+                    {% elif uid_entry.days_remaining() > 0 %}
+                        <span class="badge badge-warning">{{ uid_entry.days_remaining() }} days</span>
+                    {% else %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% endif %}
+                </td>
+                <td>{{ uid_entry.expires_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if uid_entry.is_expired() %}
+                        <span class="badge badge-danger">Expired</span>
+                    {% else %}
+                        <span class="badge badge-success">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button onclick="showExtendModal({{ uid_entry.id }}, '{{ uid_entry.uid }}')" 
+                            class="btn btn-success" style="padding: 0.4rem 0.8rem; font-size: 0.875rem; margin-right: 0.25rem;">
+                        Extend
+                    </button>
+                    <button onclick="showReduceModal({{ uid_entry.id }}, '{{ uid_entry.uid }}')" 
+                            class="btn btn-warning" style="padding: 0.4rem 0.8rem; font-size: 0.875rem; margin-right: 0.25rem;">
+                        Reduce
+                    </button>
+                    <button onclick="showSwitchModal({{ uid_entry.id }}, '{{ uid_entry.uid }}')" 
+                            class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem; margin-right: 0.25rem;">
+                        Switch
+                    </button>
+                    <a href="{{ url_for('owner_delete_uid', uid_id=uid_entry.id) }}" 
+                       class="btn btn-danger" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;"
+                       onclick="return confirm('Delete UID {{ uid_entry.uid }}?')">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="color: #999;">No UIDs found with current filters.</p>
+    {% endif %}
+</div>
+
+<!-- Extend Modal -->
+<div id="extendModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 400px; margin: 0;">
+        <h2 style="margin-bottom: 1rem;">Extend UID Duration</h2>
+        <form method="POST" id="extendForm">
+            <div class="form-group">
+                <label>UID</label>
+                <input type="text" id="extendUid" readonly style="background: #f5f5f5;">
+            </div>
+            <div class="form-group">
+                <label for="extendDays">Days to Add</label>
+                <input type="number" id="extendDays" name="days" min="1" required>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-success">Extend</button>
+                <button type="button" class="btn btn-danger" onclick="hideExtendModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Reduce Modal -->
+<div id="reduceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 400px; margin: 0;">
+        <h2 style="margin-bottom: 1rem;">Reduce UID Duration</h2>
+        <form method="POST" id="reduceForm">
+            <div class="form-group">
+                <label>UID</label>
+                <input type="text" id="reduceUid" readonly style="background: #f5f5f5;">
+            </div>
+            <div class="form-group">
+                <label for="reduceDays">Days to Reduce</label>
+                <input type="number" id="reduceDays" name="days" min="1" required>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-warning">Reduce</button>
+                <button type="button" class="btn btn-danger" onclick="hideReduceModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Switch Modal -->
+<div id="switchModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="max-width: 400px; margin: 0;">
+        <h2 style="margin-bottom: 1rem;">Switch UID</h2>
+        <form method="POST" id="switchForm">
+            <div class="form-group">
+                <label>Current UID</label>
+                <input type="text" id="switchOldUid" readonly style="background: #f5f5f5;">
+            </div>
+            <div class="form-group">
+                <label for="switchNewUid">New UID</label>
+                <input type="text" id="switchNewUid" name="new_uid" required>
+            </div>
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">Switch</button>
+                <button type="button" class="btn btn-danger" onclick="hideSwitchModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function showExtendModal(uidId, uid) {
+    document.getElementById('extendUid').value = uid;
+    document.getElementById('extendForm').action = `/owner/extend_uid/${uidId}`;
+    document.getElementById('extendModal').style.display = 'flex';
+}
+function hideExtendModal() {
+    document.getElementById('extendModal').style.display = 'none';
+}
+
+function showReduceModal(uidId, uid) {
+    document.getElementById('reduceUid').value = uid;
+    document.getElementById('reduceForm').action = `/owner/reduce_uid/${uidId}`;
+    document.getElementById('reduceModal').style.display = 'flex';
+}
+function hideReduceModal() {
+    document.getElementById('reduceModal').style.display = 'none';
+}
+
+function showSwitchModal(uidId, uid) {
+    document.getElementById('switchOldUid').value = uid;
+    document.getElementById('switchForm').action = `/owner/switch_uid/${uidId}`;
+    document.getElementById('switchModal').style.display = 'flex';
+}
+function hideSwitchModal() {
+    document.getElementById('switchModal').style.display = 'none';
+}
+</script>
+{% endblock %}
