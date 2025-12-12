@@ -4,6 +4,7 @@
 Flask==3.0.0
 Flask-SQLAlchemy==3.1.1
 Werkzeug==3.0.1
+gunicorn==21.2.0
 
 # Discord Bot
 discord.py==2.3.2
@@ -17,4 +18,8 @@ python-dotenv==1.0.0
 # Utilities
 requests==2.31.0
 
-# Note: mitmproxy conflicts with Flask 3.0, use separately if needed
+# MITM Proxy
+mitmproxy==10.1.6
+
+# Protobuf (for MITM)
+protobuf==4.25.1

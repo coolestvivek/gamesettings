@@ -24,6 +24,9 @@ def terminate_process(p):
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     
+    # Get PORT from environment (Railway provides this)
+    flask_port = os.getenv('PORT', '5000')
+    
     # File paths
     app_script = os.path.join(script_dir, "app.py")
     mitm_addon = os.path.join(script_dir, "mitmproxyutils.py")
@@ -61,9 +64,8 @@ def main():
     print("=" * 60)
     print("Mani 272 - COMPLETE SYSTEM STARTUP")
     print("=" * 60)
-    print(f"Flask Web Dashboard: http://127.0.0.1:5000")
-    print(f"Network Access: http://10.197.70.127:5000")
-    print(f"MITM Proxy: http://10.197.70.127:9516")
+    print(f"Flask Web Dashboard: Running on port {flask_port}")
+    print(f"MITM Proxy: Running on port 9516")
     print(f"Discord Bot: Starting...")
     print("=" * 60)
     
@@ -83,10 +85,8 @@ def main():
         print("\n" + "=" * 60)
         print("ALL SYSTEMS ONLINE!")
         print("=" * 60)
-        print("\nEXE Configuration:")
-        print("  Proxy IP: 10.197.70.127")
-        print("  Proxy Port: 9516")
-        print("  Proxy URL: http://10.197.70.127:9516")
+        print("\nMITM Proxy Configuration:")
+        print(f"  Proxy Port: 9516")
         print("\nPress Ctrl+C to stop all services...")
         print("=" * 60)
         
