@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["python310", "gcc", "rustc", "cargo"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[start]
+cmd = "python start_all.py"

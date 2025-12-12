@@ -2,7 +2,7 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "python app.py"
+startCommand = "python start_all.py"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 10
 
